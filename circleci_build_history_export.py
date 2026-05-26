@@ -32,12 +32,15 @@ from circleci_export_utils import (
     iter_project_pipelines,
     iter_workflow_jobs,
     job_row,
+    load_dotenv,
     pipeline_base_row,
     resolve_project_slug,
     verify_project_exists,
     window_from_args,
     workflow_row,
 )
+
+load_dotenv()
 
 
 def main() -> None:
