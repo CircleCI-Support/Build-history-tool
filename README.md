@@ -22,7 +22,20 @@ CircleCI API v2 expects a **personal** token, not a project token.
 2. Open **User Settings** → **Personal API Tokens**.
 3. Create a token and copy it.
 
-Set it in your environment (recommended):
+### Recommended: use a `.env` file
+
+A `.env` file next to the script is loaded automatically on startup. Copy the template and fill it in:
+
+```bash
+cp .env.example .env
+# then edit .env and set CIRCLE_TOKEN and (optionally) CIRCLECI_PROJECT_SLUG
+```
+
+`.env` is gitignored. Real shell environment variables (and `--token` / `--project` on the command line) override values from `.env`, so you can still use plain `export` or pass flags when you want to.
+
+### Alternatives
+
+Export in your shell:
 
 ```bash
 export CIRCLE_TOKEN='your-token-here'
@@ -34,7 +47,7 @@ Or pass it once:
 ./circleci_build_history_export.py --token 'your-token-here' -p gh/org/repo -o out.csv
 ```
 
-Avoid committing the token or putting it in shell history unnecessarily; prefer `export` in an interactive session or a secrets manager for cron.
+Avoid committing the token or putting it in shell history unnecessarily; prefer the `.env` file (or a secrets manager for cron — see [Scheduling](#scheduling-cron)).
 
 ## Project slug (required for each run)
 
@@ -45,13 +58,13 @@ History is always scoped to **a single project**. Use the same slug CircleCI sho
 | GitHub    | `gh/myorg/myrepo`         |
 | Bitbucket | `bb/my-workspace/myrepo` |
 
-You can pass the slug on the command line or set it once in the environment:
+You can pass the slug on the command line, set it in `.env`, or export it once in the environment:
 
 ```bash
 export CIRCLECI_PROJECT_SLUG='gh/myorg/myrepo'
 ```
 
-If both are set, `--project` wins. If neither is set, the script exits with an error.
+Precedence (highest wins): `--project` flag → `CIRCLECI_PROJECT_SLUG` in your shell → value in `.env`. If nothing is set, the script exits with an error.
 
 Optional **`--verify-project`** performs a quick API check that the project exists (and that your token can access it) before downloading pipelines.
 

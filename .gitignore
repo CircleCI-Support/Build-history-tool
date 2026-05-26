@@ -1,0 +1,13 @@
+# Local secrets / config — never commit.
+.env
+.env.local
+*.env.local
+
+# Python cache.
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Default output and cron log produced by the script.
+circleci_build_history.csv
+circleci_export_cron.log

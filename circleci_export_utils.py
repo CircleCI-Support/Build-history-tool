@@ -17,6 +17,46 @@ from urllib.request import Request, urlopen
 
 API_BASE = "https://circleci.com/api/v2"
 ENV_PROJECT_SLUG = "CIRCLECI_PROJECT_SLUG"
+ENV_FILE_DEFAULT = ".env"
+
+
+def load_dotenv(path: str | None = None) -> dict[str, str]:
+    """Populate os.environ from a `.env` file without overriding existing vars.
+
+    Stdlib-only; supports `KEY=VALUE`, blank lines, `#` comments, surrounding
+    single/double quotes, and a leading `export `. Returns the keys that were
+    actually applied to os.environ (useful for tests). Missing file is fine.
+    """
+    target = path or os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), ENV_FILE_DEFAULT
+    )
+    applied: dict[str, str] = {}
+    try:
+        with open(target, "r", encoding="utf-8") as fh:
+            lines = fh.readlines()
+    except FileNotFoundError:
+        return applied
+
+    for raw in lines:
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[len("export "):].lstrip()
+        if "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key = key.strip()
+        value = value.strip()
+        if not key:
+            continue
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+            value = value[1:-1]
+        if key in os.environ:
+            continue
+        os.environ[key] = value
+        applied[key] = value
+    return applied
 
 
 @dataclass(frozen=True)
